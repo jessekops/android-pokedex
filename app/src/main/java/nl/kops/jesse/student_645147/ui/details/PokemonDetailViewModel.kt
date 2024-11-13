@@ -22,6 +22,9 @@ class PokemonDetailViewModel @Inject constructor(
     private val _pokemonDetail = MutableStateFlow<PokemonDetail?>(null)
     val pokemonDetail: StateFlow<PokemonDetail?> = _pokemonDetail
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
     private val favoritesDataStore = FavoritesDataStore(context)
 
     fun fetchPokemonDetail(id: Int) {
@@ -29,11 +32,17 @@ class PokemonDetailViewModel @Inject constructor(
             try {
                 val detail = repository.getPokemonDetail(id)
                 _pokemonDetail.value = detail
+                _errorMessage.value = null
             } catch (e: Exception) {
                 _pokemonDetail.value = null
+                _errorMessage.value = "Failed to load Pokémon details. Please try again."
                 println("Error fetching Pokémon detail: $e")
             }
         }
+    }
+
+    fun retryFetchingPokemonDetail(id: Int) {
+        fetchPokemonDetail(id)
     }
 
     fun addToFavorites(pokemonId: Int) {

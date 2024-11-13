@@ -26,6 +26,7 @@ fun MainScreen(
 ) {
     val pokemonList by viewModel.pokemonList.collectAsState()
     val loading by viewModel.loading.collectAsState()
+    val error by viewModel.error.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
     Column(
@@ -62,6 +63,26 @@ fun MainScreen(
                     CircularProgressIndicator()
                 }
             }
+            error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = error ?: "An error occurred.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Red
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        androidx.compose.material3.Button(
+                            onClick = { viewModel.retry() }
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
             pokemonList.isEmpty() -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -94,3 +115,4 @@ fun MainScreen(
         }
     }
 }
+

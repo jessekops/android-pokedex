@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +29,7 @@ fun DetailScreen(navController: NavController, pokemonId: Int, viewModel: Pokemo
     }
 
     val pokemonDetail = viewModel.pokemonDetail.collectAsState().value
+    val errorMessage = viewModel.errorMessage.collectAsState().value
     val isFavorite = remember { mutableStateOf(false) }
 
     LaunchedEffect(pokemonId) {
@@ -38,7 +38,29 @@ fun DetailScreen(navController: NavController, pokemonId: Int, viewModel: Pokemo
         }
     }
 
-    if (pokemonDetail == null) {
+    if (errorMessage != null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { viewModel.retryFetchingPokemonDetail(pokemonId) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E0940))
+                ) {
+                    Text("Retry")
+                }
+            }
+        }
+    } else if (pokemonDetail == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }

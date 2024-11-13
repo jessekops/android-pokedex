@@ -21,6 +21,9 @@ class PokemonViewModel @Inject constructor(
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     private var fullPokemonList = listOf<Pokemon>()
 
     init {
@@ -29,25 +32,29 @@ class PokemonViewModel @Inject constructor(
 
     private fun fetchPokemonList() {
         viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
             try {
-                _loading.value = true
                 fullPokemonList = repository.getPokemonList()
                 _pokemonList.value = fullPokemonList
             } catch (e: Exception) {
-                print(e)
+                _error.value = "Failed to load Pokémon. Please check your connection and try again."
             } finally {
                 _loading.value = false
             }
         }
     }
 
+    fun retry() {
+        fetchPokemonList()
+    }
+
     fun searchPokemon(query: String) {
-        viewModelScope.launch {
-            _pokemonList.value = if (query.isEmpty()) {
-                fullPokemonList
-            } else {
-                fullPokemonList.filter { it.name.contains(query, ignoreCase = true) }
-            }
+        _pokemonList.value = if (query.isEmpty()) {
+            fullPokemonList
+        } else {
+            fullPokemonList.filter { it.name.contains(query, ignoreCase = true) }
         }
     }
 }
+

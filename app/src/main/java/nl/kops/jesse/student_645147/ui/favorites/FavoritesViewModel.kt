@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.kops.jesse.student_645147.data.entity.Pokemon
 import nl.kops.jesse.student_645147.data.repository.PokemonDetailRepository
@@ -27,17 +28,30 @@ class FavoritesViewModel @Inject constructor(
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     init {
+        loadFavorites()
+    }
+
+    fun retry() {
         loadFavorites()
     }
 
     private fun loadFavorites() {
         viewModelScope.launch {
-            favoritesDataStore.favoritesFlow.collect { favoriteIds ->
-                _loading.value = true
+            _loading.value = true
+            _error.value = null
+
+            try {
+                val favoriteIds = favoritesDataStore.favoritesFlow.first()
                 _favoritesList.value = favoriteIds.mapNotNull { id ->
                     getPokemonById(id)
                 }
+            } catch (e: Exception) {
+                _error.value = "Failed to load favorites. Please try again."
+            } finally {
                 _loading.value = false
             }
         }
@@ -56,3 +70,5 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 }
+
+
