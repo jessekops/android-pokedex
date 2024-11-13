@@ -66,10 +66,6 @@ fun MainScreen(
                     pokemonName = pokemon.name.capitalize(),
                     imageUrl = pokemon.imageUrl,
                     onClick = {
-                        println("PokemonCard clicked: ${pokemon.id}")
-                        // Log the Pokemon ID using Log.d
-                        Log.d("PokemonCard", "Navigating to detailscreen with Pokemon ID: ${pokemon.id}")
-
                         navController.navigate("detailscreen/${pokemon.id}")
 
                     }
