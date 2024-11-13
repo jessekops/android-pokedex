@@ -29,15 +29,14 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .background(Color.White, shape = MaterialTheme.shapes.small)
-            .shadow(2.dp, shape = MaterialTheme.shapes.small)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .background(Color.White, shape = MaterialTheme.shapes.medium)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_search),
             contentDescription = "Search Icon",
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(16.dp)
         )
 
         Spacer(modifier = Modifier.width(8.dp))

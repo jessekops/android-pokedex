@@ -5,13 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +30,13 @@ fun DetailScreen(navController: NavController, pokemonId: Int, viewModel: Pokemo
     }
 
     val pokemonDetail = viewModel.pokemonDetail.collectAsState().value
+    val isFavorite = remember { mutableStateOf(false) }
+
+    LaunchedEffect(pokemonId) {
+        viewModel.favoritesFlow.collect { favorites ->
+            isFavorite.value = favorites.contains(pokemonId.toString())
+        }
+    }
 
     if (pokemonDetail == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -67,11 +77,22 @@ fun DetailScreen(navController: NavController, pokemonId: Int, viewModel: Pokemo
                             )
                         }
                     }
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_favorites),
-                        contentDescription = "Favorites Icon",
-                        modifier = Modifier.size(24.dp)
-                    )
+                    IconButton(
+                        onClick = {
+                            if (isFavorite.value) {
+                                viewModel.removeFromFavorites(pokemonId)
+                            } else {
+                                viewModel.addToFavorites(pokemonId)
+                            }
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_favorites),
+                            contentDescription = "Favorites Icon",
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = if (isFavorite.value) ColorFilter.tint(Color.Red) else null
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

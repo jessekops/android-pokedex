@@ -18,6 +18,9 @@ class PokemonViewModel @Inject constructor(
     private val _pokemonList = MutableStateFlow<List<Pokemon>>(emptyList())
     val pokemonList: StateFlow<List<Pokemon>> = _pokemonList
 
+    private val _loading = MutableStateFlow(true)
+    val loading: StateFlow<Boolean> = _loading
+
     private var fullPokemonList = listOf<Pokemon>()
 
     init {
@@ -27,10 +30,13 @@ class PokemonViewModel @Inject constructor(
     private fun fetchPokemonList() {
         viewModelScope.launch {
             try {
+                _loading.value = true
                 fullPokemonList = repository.getPokemonList()
                 _pokemonList.value = fullPokemonList
             } catch (e: Exception) {
                 print(e)
+            } finally {
+                _loading.value = false
             }
         }
     }

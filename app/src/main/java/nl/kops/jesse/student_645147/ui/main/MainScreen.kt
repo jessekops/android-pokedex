@@ -1,6 +1,5 @@
 package nl.kops.jesse.student_645147.ui.main
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -25,7 +24,8 @@ fun MainScreen(
     navController: NavController,
     viewModel: PokemonViewModel = hiltViewModel()
 ) {
-    val pokemonList = viewModel.pokemonList.collectAsState().value
+    val pokemonList by viewModel.pokemonList.collectAsState()
+    val loading by viewModel.loading.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
     Column(
@@ -38,7 +38,8 @@ fun MainScreen(
             onSearchQueryChanged = { query ->
                 searchQuery = query
                 viewModel.searchPokemon(query)
-            }
+            },
+            modifier = Modifier.padding(16.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -52,27 +53,44 @@ fun MainScreen(
             modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(pokemonList.filter {
-                it.name.contains(searchQuery, ignoreCase = true)
-            }) { pokemon ->
-                PokemonCard(
-                    pokemonId = pokemon.id.toString().padStart(3, '0'),
-                    pokemonName = pokemon.name.capitalize(),
-                    imageUrl = pokemon.imageUrl,
-                    onClick = {
-                        navController.navigate("detailscreen/${pokemon.id}")
-
+        when {
+            loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            pokemonList.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No Pokémon found!", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            else -> {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(pokemonList.filter {
+                        it.name.contains(searchQuery, ignoreCase = true)
+                    }) { pokemon ->
+                        PokemonCard(
+                            pokemonId = pokemon.id.toString().padStart(3, '0'),
+                            pokemonName = pokemon.name.capitalize(),
+                            imageUrl = pokemon.imageUrl,
+                            onClick = {
+                                navController.navigate("detailscreen/${pokemon.id}")
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }
 }
-
-
